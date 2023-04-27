@@ -7,6 +7,8 @@ from keras.losses import SparseCategoricalCrossentropy
 
 import hyperparameters_obj as hp
 
+#THE CODE BELOW IS JUST A PLACEHOLDER, PLEASE EDIT AS YOU LIKE
+
 
 class YourModel_obj(tf.keras.Model):
     """ Your own neural network model. """

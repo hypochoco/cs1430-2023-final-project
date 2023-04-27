@@ -6,6 +6,8 @@ import tensorflow as tf
 
 import hyperparameters_sc as hp
 
+#THE CODE BELOW IS JUST A PLACEHOLDER, PLEASE EDIT AS YOU LIKE
+
 class Datasets_sc():
     """ Class for containing the training and test sets as well as
     other useful data-related information. Contains the functions
