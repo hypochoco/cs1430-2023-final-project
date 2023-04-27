@@ -1,1 +1,9 @@
 /data
+/.DS_Store
+
+code/logs/*
+code/checkpoints/*
+code/misclassified/*
+
+.vscode
+.idea
