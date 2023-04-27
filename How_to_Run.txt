@@ -1,0 +1,20 @@
+Please first note that I had to split preprocess, hyperparameters, and the model files into their own object and scene files.
+This is just due to the way they had run.py structured before and fitting it into that code. 
+
+There are 3 options to run the code, split up into respective tasks:
+1 - Runs the scene model
+2 - Runs the Object Model
+3 - (Yet to be implemented) Runs both models
+
+In order to run the scene classification model enter the following into the terminal: 
+
+python run.py --task 1 --data ../data/15_Scene
+
+To run the object classification model enter the following: 
+
+python run.py --task 2 --data ../data/CIFAR-100-modified
+
+The same logic follows for task 3 being both models. However we should discuss how we want to implement this a little more in depth.
+
+Finally, most of the commands are same as with HW5 minus the LIME implementation. 
+Let me know if you have any questions!
