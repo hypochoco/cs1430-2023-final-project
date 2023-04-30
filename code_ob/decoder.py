@@ -33,3 +33,11 @@ class TransformerDecoder(tf.keras.Model):
 
         probs = self.classifier(results)
         return probs
+    
+    
+    def get_config(self):
+        return {
+            "vocab_size": self.vocab_size,
+            "hidden_size": self.hidden_size,
+            "window_size": self.window_size,
+        }

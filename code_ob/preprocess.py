@@ -158,7 +158,7 @@ if __name__ == "__main__":
     There may be some issues with this and using different file formats.
     """
 
-    dir = ""
+    dir = "../data"
     with open(f'{dir}/data.p', 'wb') as pickle_file:
         pickle.dump(preprocess(dir), pickle_file)
     print(f'Data has been dumped into {dir}/data.p!')
