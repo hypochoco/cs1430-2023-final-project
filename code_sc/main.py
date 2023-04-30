@@ -17,10 +17,10 @@ def parse_args(args=None):
     For example: 
         parse_args('--type', 'rnn', ...)
     """
-    parser = argparse.ArgumentParser(description="Let's train some neural nets!", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--type',           required=True,              choices=['rnn', 'transformer'],     help='Type of model to train')
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--task',           required=True,              choices=['train', 'test', 'both'],  help='Task to run')
     parser.add_argument('--data',           required=True,              help='File path to the assignment data file.')
+
     parser.add_argument('--epochs',         type=int,   default=3,      help='Number of epochs used in training.')
     parser.add_argument('--lr',             type=float, default=1e-3,   help='Model\'s learning rate')
     parser.add_argument('--optimizer',      type=str,   default='adam', choices=['adam', 'rmsprop', 'sgd'], help='Model\'s optimizer')
@@ -47,10 +47,7 @@ def main(args):
     test_captions   = np.array(data_dict['test_captions'])
     train_img_feats = feat_prep(data_dict['train_image_features'])
     test_img_feats  = feat_prep(data_dict['test_image_features'])
-    # train_images    = img_prep(data_dict['train_images'])
-    # test_images     = img_prep(data_dict['test_images'])
     word2idx        = data_dict['word2idx']
-    # idx2word        = data_dict['idx2word']
 
     ##############################################################################
     ## Training Task
@@ -58,7 +55,7 @@ def main(args):
         
         ##############################################################################
         ## Model Construction
-        decoder_class = RNNDecoder if args.type=='rnn' else TransformerDecoder
+        decoder_class = TransformerDecoder
         decoder = decoder_class(
             vocab_size  = len(word2idx), 
             hidden_size = args.hidden_size, 
@@ -100,13 +97,11 @@ def load_model(args):
     model = tf.keras.models.load_model(
         args.chkpt_path,
         custom_objects=dict(
-            AttentionHead              = transformer.AttentionHead,
-            AttentionMatrix        = transformer.AttentionMatrix,
-            MultiHeadedAttention            = transformer.MultiHeadedAttention,
-            TransformerBlock       = transformer.TransformerBlock,
+            AttentionHead           = transformer.AttentionHead,
+            AttentionMatrix         = transformer.AttentionMatrix,
+            TransformerBlock        = transformer.TransformerBlock,
             PositionalEncoding      = transformer.PositionalEncoding,
             TransformerDecoder      = TransformerDecoder,
-            RNNDecoder              = RNNDecoder,
             ImageCaptionModel       = ImageCaptionModel
         ),
     )
