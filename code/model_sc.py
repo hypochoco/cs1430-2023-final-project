@@ -7,8 +7,17 @@ from keras.losses import SparseCategoricalCrossentropy
 
 import hyperparameters_sc as hp
 
-#THE CODE BELOW IS JUST A PLACEHOLDER, PLEASE EDIT AS YOU LIKE
 
+
+
+
+
+
+
+
+
+
+#THE CODE BELOW IS JUST A PLACEHOLDER, PLEASE EDIT AS YOU LIKE
 
 class YourModel_sc(tf.keras.Model):
     """ Your own neural network model. """
@@ -17,8 +26,6 @@ class YourModel_sc(tf.keras.Model):
         super(YourModel_sc, self).__init__()
 
         self.optimizer = SGD(learning_rate=hp.learning_rate, momentum=hp.momentum)
-
-
 
         self.architecture = [
             Conv2D(10, (5, 5), activation='relu', input_shape=(None, None, 1)),
@@ -132,12 +139,6 @@ class YourModel_sc(tf.keras.Model):
 #     @staticmethod
 #     def loss_fn(labels, predictions):
 #         """ Loss function for model. """
-
-#         # TASK 3
-#         # TODO: Select a loss function for your network (see the documentation
-#         #       for tf.keras.losses)
-#         #       Read the documentation carefully, some might not work with our 
-#         #       model!
 
 #         lossFunction = SparseCategoricalCrossentropy()
 #         return lossFunction(labels, predictions)
