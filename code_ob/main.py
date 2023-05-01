@@ -2,9 +2,11 @@ import argparse
 import numpy as np
 import pickle
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 
 from model import ImageCaptionModel, accuracy_function, loss_function
+from preprocess import preprocess_single_image
 from decoder import TransformerDecoder 
 import transformer
 
@@ -18,7 +20,7 @@ def parse_args(args=None):
         parse_args('--type', 'rnn', ...)
     """
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--task',           required=True,              choices=['train', 'test', 'both'],  help='Task to run')
+    parser.add_argument('--task',           required=True,              choices=['train', 'test', 'both', 'single'],  help='Task to run')
     parser.add_argument('--data',           required=True,              help='File path to the assignment data file.')
 
     parser.add_argument('--epochs',         type=int,   default=3,      help='Number of epochs used in training.')
@@ -29,6 +31,7 @@ def parse_args(args=None):
     parser.add_argument('--window_size',    type=int,   default=20,     help='Window size of text entries.')
     parser.add_argument('--chkpt_path',     default='',                 help='where the model checkpoint is')
     parser.add_argument('--check_valid',    default=True,               action="store_true",  help='if training, also print validation after each epoch')
+    parser.add_argument('--image_path',     type=str,   default='',     help='image path for single image testing.')
     if args is None: 
         return parser.parse_args()      ## For calling through command line
     return parser.parse_args(args)      ## For calling through notebook.
@@ -81,6 +84,20 @@ def main(args):
         if not (args.task == 'both' and args.check_valid):
             test_model(model, test_captions, test_img_feats, word2idx['<pad>'], args)
 
+    ##############################################################################
+    ## Single Image Task
+    if args.task in ('single'):
+        model = load_model(args)
+
+        image_feat, image = preprocess_single_image(args.image_path)
+
+        temperature = 0.2
+        output = gen_caption_temperature(model, image_feat, word2idx, word2idx['<pad>'], temperature, args.window_size)
+        print(output)
+        plt.imshow(image)
+        plt.text(50, -10, output)
+        plt.show()
+        
     ##############################################################################
 
 ##############################################################################
@@ -148,6 +165,28 @@ def test_model(model, captions, img_feats, pad_idx, args):
     '''Tests model and returns model statistics'''
     perplexity, accuracy = model.test(captions, img_feats, pad_idx, batch_size=args.batch_size)
     return perplexity, accuracy
+
+
+def gen_caption_temperature(model, image_embedding, wordToIds, padID, temp, window_length):
+    """
+    Function used to generate a caption using an ImageCaptionModel given
+    an image embedding. 
+    """
+    idsToWords = {id: word for word, id in wordToIds.items()}
+    unk_token = wordToIds['<unk>']
+    caption_so_far = [wordToIds['<start>']]
+    while len(caption_so_far) < window_length and caption_so_far[-1] != wordToIds['<end>']:
+        caption_input = np.array([caption_so_far + ((window_length - len(caption_so_far)) * [padID])])
+        logits = model(np.expand_dims(image_embedding, 0), caption_input)
+        logits = logits[0][len(caption_so_far) - 1]
+        probs = tf.nn.softmax(logits / temp).numpy()
+        next_token = unk_token
+        attempts = 0
+        while next_token == unk_token and attempts < 5:
+            next_token = np.random.choice(len(probs), p=probs)
+            attempts += 1
+        caption_so_far.append(next_token)
+    return ' '.join([idsToWords[x] for x in caption_so_far][1:-1])
 
 
 ## END UTILITY METHODS

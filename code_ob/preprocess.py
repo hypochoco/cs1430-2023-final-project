@@ -151,6 +151,24 @@ def preprocess(dir):
     )
 
 
+def preprocess_single_image(image_path: str):
+    """ Preprocesses a single image.
+
+    :image_path: path to image to preprocess.
+    """
+
+    resnet = tf.keras.applications.ResNet50(False)  ## Produces Bx7x7x2048
+    gap = tf.keras.layers.GlobalAveragePooling2D()  ## Produces Bx2048
+
+    with Image.open(image_path) as img:
+        img_array = np.array(img.resize((224,224)))
+    img_in = tf.keras.applications.resnet50.preprocess_input(img_array)[np.newaxis, :]
+    image_features = gap(resnet(img_in))
+    vis_images = img_array
+
+    return np.array(image_features).flatten(), np.array(vis_images)
+
+
 if __name__ == "__main__":
     """ When this file is run, it will preprocess images in the specified
     foler using an accompanied captions.txt file. 
