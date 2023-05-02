@@ -9,6 +9,14 @@ import hyperparameters_sc as hp
 
 #THE CODE BELOW IS JUST A PLACEHOLDER, PLEASE EDIT AS YOU LIKE
 
+#NOTES: 
+# could use og just with more epoch
+# could use the other simple cnn version
+# or try the AlexNet setup
+# all of these are fine, getting about blank percent i think (not able to fully test yet)
+#however the vgg16 model (using the pretrained) is still seeming way better (accuracy 90% on HW5)
+#so might just want to stick with that one??
+
 
 class YourModel_sc(tf.keras.Model):
     """ Your own neural network model. """
@@ -16,17 +24,25 @@ class YourModel_sc(tf.keras.Model):
     def __init__(self):
         super(YourModel_sc, self).__init__()
 
-        self.optimizer = SGD(learning_rate=hp.learning_rate, momentum=hp.momentum)
+        #this if using og or other simple version
+        self.optimizer = SGD(learning_rate=0.01)
 
-
-
+        #other simple verion to test out
         self.architecture = [
-            Conv2D(10, (5, 5), activation='relu', input_shape=(None, None, 1)),
-            MaxPool2D(pool_size=(2, 2)),
-            Dropout(0.25),
+            Conv2D(32, (3, 3), activation='relu'),
+            tf.keras.layers.BatchNormalization(),
+            MaxPool2D(),
+
+            Conv2D(64, (2, 2), activation='relu'),
+            tf.keras.layers.BatchNormalization(),
+            MaxPool2D(),
+
+            Conv2D(128, (2, 2), activation='relu'),
+            tf.keras.layers.BatchNormalization(),
             Flatten(),
-            Dense(32, activation='relu'),
-            Dropout(0.25),
+
+            Dense(128, activation='relu'),
+            Dropout(0.5),
             Dense(15, activation='softmax')
         ]
 
