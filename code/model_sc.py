@@ -7,15 +7,17 @@ from keras.losses import SparseCategoricalCrossentropy
 
 import hyperparameters_sc as hp
 
-#THE CODE BELOW IS JUST A PLACEHOLDER, PLEASE EDIT AS YOU LIKE
 
-#NOTES: 
-# could use og just with more epoch
-# could use the other simple cnn version
-# or try the AlexNet setup
-# all of these are fine, getting about blank percent i think (not able to fully test yet)
-#however the vgg16 model (using the pretrained) is still seeming way better (accuracy 90% on HW5)
-#so might just want to stick with that one??
+
+
+
+
+
+
+
+
+
+#THE CODE BELOW IS JUST A PLACEHOLDER, PLEASE EDIT AS YOU LIKE
 
 
 class YourModel_sc(tf.keras.Model):
@@ -24,10 +26,10 @@ class YourModel_sc(tf.keras.Model):
     def __init__(self):
         super(YourModel_sc, self).__init__()
 
-        #this if using og or other simple version
-        self.optimizer = SGD(learning_rate=0.01)
+        self.optimizer = SGD(learning_rate=hp.learning_rate, momentum=hp.momentum)
 
-        #other simple verion to test out
+
+
         self.architecture = [
             Conv2D(32, (3, 3), activation='relu'),
             tf.keras.layers.BatchNormalization(),
@@ -148,12 +150,6 @@ class YourModel_sc(tf.keras.Model):
 #     @staticmethod
 #     def loss_fn(labels, predictions):
 #         """ Loss function for model. """
-
-#         # TASK 3
-#         # TODO: Select a loss function for your network (see the documentation
-#         #       for tf.keras.losses)
-#         #       Read the documentation carefully, some might not work with our 
-#         #       model!
 
 #         lossFunction = SparseCategoricalCrossentropy()
 #         return lossFunction(labels, predictions)

@@ -6,7 +6,8 @@ import tensorflow as tf
 
 import hyperparameters_sc as hp
 
-#THE CODE BELOW IS JUST A PLACEHOLDER, PLEASE EDIT AS YOU LIKE
+# Note: Code layout borrowed from CSCI 1430's HW 5
+# TODO: Figure out file path situation
 
 class Datasets_sc():
     """ Class for containing the training and test sets as well as
@@ -77,32 +78,11 @@ class Datasets_sc():
 
             data_sample[i] = img
 
-        # TASK 1
-        # TODO: Calculate the mean and standard deviation
-        #       of the samples in data_sample and store them in
-        #       self.mean and self.std respectively.
-        #
-        #       Note: This is _not_ a mean over all pixels;
-        #             it is a mean image (the mean input data point).
-        #       
-        #             For example, the mean of the two images:
-        #
-        #             [[[0, 0, 100], [0, 0, 100]],      [[[100, 0, 0], [100, 0, 0]],
-        #              [[0, 100, 0], [0, 100, 0]],  and  [[0, 100, 0], [0, 100, 0]],
-        #              [[100, 0, 0], [100, 0, 0]]]       [[0, 0, 100], [0, 0, 100]]]
-        #
-        #             would be
-        #
-        #             [[[50, 0, 50], [50, 0, 50]],
-        #              [[0, 100, 0], [0, 100, 0]],
-        #              [[50, 0, 50], [50, 0, 50]]]
-        #
-        # ==========================================================
-
+        # Calculate the mean and standard deviation
+        # of the samples in data_sample and store them in
+        # self.mean and self.std respectively.
         self.mean = np.mean(data_sample, axis=0)
         self.std = np.std(data_sample, axis=0)
-
-        # ==========================================================
 
         print("Dataset mean shape: [{0}, {1}, {2}]".format(
             self.mean.shape[0], self.mean.shape[1], self.mean.shape[2]))
@@ -126,15 +106,9 @@ class Datasets_sc():
             img - numpy array of shape (image size, image size, 3)
         """
 
-        # TASK 1
-        # TODO: Standardize the input image. Use self.mean and self.std
-        #       that were calculated in calc_mean_and_std() to perform
-        #       the standardization.
-        # =============================================================
-
-        img = (img - self.mean) / self.std     # replace this code
-
-        # =============================================================
+        # Standardize the input image
+        # TODO: Look into other standardization methods
+        img = (img - self.mean) / self.std
 
         return img
 
@@ -148,6 +122,8 @@ class Datasets_sc():
             img = self.standardize(img)
         return img
 
+    # TODO: Do we want to use a custom preprocess function?
+    #       Otherwise, we can just remove this.
     def custom_preprocess_fn(self, img):
         """ Custom preprocess function for ImageDataGenerator. """
 
@@ -194,30 +170,19 @@ class Datasets_sc():
         """
 
         if augment:
-            # TODO: Use the arguments of ImageDataGenerator()
-            #       to augment the data. Leave the
-            #       preprocessing_function argument as is unless
-            #       you have written your own custom preprocessing
-            #       function (see custom_preprocess_fn()).
-            #
+            # Use the arguments of ImageDataGenerator()
+            # to augment the data.
             # Documentation for ImageDataGenerator: https://bit.ly/2wN2EmK
-            #
-            # ============================================================
-
             data_gen = tf.keras.preprocessing.image.ImageDataGenerator(
                 preprocessing_function=self.preprocess_fn,
-                rotation_range=10,
-                width_shift_range=0.05,
-                height_shift_range=0.05,
-                zoom_range=0.1,
+                rotation_range=20,
+                width_shift_range=0.2,
+                height_shift_range=0.2,
+                zoom_range=[0.5, 1.0],
                 horizontal_flip=True,
-                brightness_range=(0.8, 1.)
-
+                brightness_range=(0.75, 1.25)
             )
-
-            # ============================================================
         else:
-            # Don't modify this
             data_gen = tf.keras.preprocessing.image.ImageDataGenerator(
                 preprocessing_function=self.preprocess_fn)
 
