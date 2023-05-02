@@ -11,8 +11,8 @@ import hyperparameters_obj as hp_obj
 #Scene hyperparameters are the default right now
 
 
-from model_sc import YourModel_sc #, VGGModel_sc
-from model_obj import YourModel_obj #, VGGModel_obj
+from model_sc import YourModel_sc, VGGModel_sc
+from model_obj import YourModel_obj, VGGModel_obj
 
 from preprocess_sc import Datasets_sc
 from preprocess_obj import Datasets_obj
@@ -39,7 +39,7 @@ def parse_args():
     parser.add_argument(
         '--task',
         required=True,
-        choices=['1','2' ,'3'],
+        choices=['1','2' ,'3','4','5'],
         help='''Which task of the assignment to run -
         training from scratch (1), or fine tuning VGG-16 (3).''')
     parser.add_argument(
@@ -202,6 +202,61 @@ def train(model, datasets, checkpoint_path, logs_path, init_epoch, task):
             callbacks=callback_list,
             initial_epoch=init_epoch,
         )
+
+    #VGG SCENE
+    elif task == '3':
+        # Keras callbacks for training
+        callback_list = [
+            tf.keras.callbacks.TensorBoard(
+                log_dir=logs_path,
+                update_freq='batch',
+                profile_batch=0),
+            ImageLabelingLogger(logs_path, datasets),
+            CustomModelSaver(checkpoint_path, ARGS.task, hp_sc.max_num_weights)
+        ]
+
+        # Include confusion logger in callbacks if flag set
+        if ARGS.confusion:
+            callback_list.append(ConfusionMatrixLogger(logs_path, datasets))
+
+        # Begin training
+        model.fit(
+            x=datasets.train_data,
+            validation_data=datasets.test_data,
+            epochs=hp_sc.num_epochs,
+            batch_size=None,            # Required as None as we use an ImageDataGenerator; see preprocess.py get_data()
+            callbacks=callback_list,
+            initial_epoch=init_epoch,
+        )
+
+    # VGG OBJECT
+    elif task == '4':
+        # Keras callbacks for training
+        callback_list = [
+            tf.keras.callbacks.TensorBoard(
+                log_dir=logs_path,
+                update_freq='batch',
+                profile_batch=0),
+            ImageLabelingLogger(logs_path, datasets),
+            CustomModelSaver(checkpoint_path, ARGS.task, hp_obj.max_num_weights)
+        ]
+
+        # Include confusion logger in callbacks if flag set
+        if ARGS.confusion:
+            callback_list.append(ConfusionMatrixLogger(logs_path, datasets))
+
+        # Begin training
+        model.fit(
+            x=datasets.train_data,
+            validation_data=datasets.test_data,
+            epochs=hp_obj.num_epochs,
+            batch_size=None,            # Required as None as we use an ImageDataGenerator; see preprocess.py get_data()
+            callbacks=callback_list,
+            initial_epoch=init_epoch,
+        )
+
+
+
     else: 
         #DO BOTH... Need to figure out what that means
         pass
@@ -269,6 +324,38 @@ def main():
 
         # Print summary of model
         model.summary()
+
+    elif ARGS.task == '3':
+        datasets = Datasets_sc(ARGS.data, ARGS.task)
+        model = VGGModel_sc()
+        checkpoint_path = "checkpoints" + os.sep + \
+            "vgg_model" + os.sep + timestamp + os.sep
+        logs_path = "logs" + os.sep + "vgg_model" + \
+            os.sep + timestamp + os.sep
+        model(tf.keras.Input(shape=(224, 224, 3)))
+
+        # Print summaries for both parts of the model
+        model.vgg16.summary()
+        model.head.summary()
+
+        # Load base of VGG model
+        model.vgg16.load_weights(ARGS.load_vgg, by_name=True)
+
+    elif ARGS.task == '4':
+        datasets = Datasets_sc(ARGS.data, ARGS.task)
+        model = VGGModel_obj()
+        checkpoint_path = "checkpoints" + os.sep + \
+            "vgg_model" + os.sep + timestamp + os.sep
+        logs_path = "logs" + os.sep + "vgg_model" + \
+            os.sep + timestamp + os.sep
+        model(tf.keras.Input(shape=(224, 224, 3)))
+
+        # Print summaries for both parts of the model
+        model.vgg16.summary()
+        model.head.summary()
+
+        # Load base of VGG model
+        model.vgg16.load_weights(ARGS.load_vgg, by_name=True)
 
     else:
         model = None #REPLACE WITH BOTH
