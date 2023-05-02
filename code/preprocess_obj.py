@@ -7,7 +7,7 @@ import tensorflow as tf
 import hyperparameters_sc as hp
 
 # Note: Code layout borrowed from CSCI 1430's HW 5
-# TODO: Figure out file path situation
+# TODO: Replace with preprocess code for captioned image dataset
 
 class Datasets_obj():
     """ Class for containing the training and test sets as well as
@@ -107,7 +107,6 @@ class Datasets_obj():
         """
 
         # Standardize the input image
-        # TODO: Look into other standardization methods
         img = (img - self.mean) / self.std
 
         return img
