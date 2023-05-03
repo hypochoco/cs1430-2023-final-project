@@ -59,11 +59,8 @@ class VGGModel(tf.keras.Model):
                    activation="relu", name="block5_conv3"),
             MaxPool2D(2, name="block5_pool")
         ]
-
         for layer in self.vgg16:
             layer.trainable = False
-
-        # Don't change the below:
         self.vgg16 = tf.keras.Sequential(self.vgg16, name="vgg_base")
 
     def call(self, x):
@@ -92,30 +89,17 @@ def preprocess_captions(captions, window_size):
         captions[step] = caption_new
 
 
-def get_image_features(image_names, dir, resnet=True, vis_subset=100):
-    """ This method extracts the features from the images using Resnet50.
-    
-    This function could also be easily modified to use vgg.
+def get_image_features(image_names, dir, feature_fn, vis_subset=100):
+    """ This method extracts the features from the images using the given feature_fn.
     """
-
-    img_in_shape = (1, 224, 224, 3)
-
-    if (resnet):
-        feature_fn = tf.keras.applications.ResNet50(False)  ## Produces Bx7x7x2048
-    else:
-        model = VGGModel()
-        path = "../code/vgg16_imagenet.h5"
-        model.build(img_in_shape)
-        model.vgg16.load_weights(path, by_name=True)
-        feature_fn = model ## Produced Bx7x7x512
 
     image_features = []
     vis_images = []
-    gap = tf.keras.layers.GlobalAveragePooling2D()  ## Produces Bx2048
+    gap = tf.keras.layers.GlobalAveragePooling2D()
     pbar = tqdm(image_names)
     for i, image_name in enumerate(pbar):
         img_path = f'{dir}/Images/{image_name}'
-        pbar.set_description(f"[({i+1}/{len(image_names)})] Processing '{img_path}' into 2048-D ResNet GAP Vector")
+        pbar.set_description(f"[({i+1}/{len(image_names)})] Processing '{img_path}' into GAP Vector")
         with Image.open(img_path) as img:
             img_array = np.array(img.resize((224,224)))
         img_in = tf.keras.applications.resnet50.preprocess_input(img_array)[np.newaxis, :]
@@ -126,7 +110,7 @@ def get_image_features(image_names, dir, resnet=True, vis_subset=100):
     return image_features, vis_images
 
 
-def get_image_feature(image_path, resnet=True):
+def get_image_feature(image_path, feature_fn):
     """ This method extracts the features from the images using
     either resnet50 or vgg16. 
     """
@@ -140,24 +124,14 @@ def get_image_feature(image_path, resnet=True):
 
     img_in = tf.keras.applications.resnet50.preprocess_input(img_array)[np.newaxis, :]
 
-    # define feature function
-    if (resnet):
-        feature_fn = tf.keras.applications.ResNet50(False)  ## Produces Bx7x7x2048
-    else:
-        model = VGGModel()
-        path = "../code/vgg16_imagenet.h5"
-        model.build(img_in.shape)
-        model.vgg16.load_weights(path, by_name=True)
-        feature_fn = model ## Produced Bx7x7x512
-
-    gap = tf.keras.layers.GlobalAveragePooling2D()  ## Produces Bx2048 or Bx512
+    gap = tf.keras.layers.GlobalAveragePooling2D()
     image_features = gap(feature_fn(img_in))
     vis_images = img_array
 
     return np.array(image_features).flatten(), np.array(vis_images)
 
 
-def preprocess(dir, resnet=True):
+def preprocess(dir, feature_fn):
     """ This is the main function that preprocesses the input data.
 
     This may need some tweaking to use other datasets.
@@ -240,9 +214,9 @@ def preprocess(dir, resnet=True):
     
     # use ResNet50 to extract image features
     print("Getting training embeddings")
-    train_image_features, train_images = get_image_features(train_image_names, dir, resnet=resnet)
+    train_image_features, train_images = get_image_features(train_image_names, dir, feature_fn)
     print("Getting testing embeddings")
-    test_image_features,  test_images  = get_image_features(test_image_names, dir, resnet=resnet)
+    test_image_features,  test_images  = get_image_features(test_image_names, dir, feature_fn)
 
     return dict(
         train_captions          = np.array(train_captions),
@@ -263,7 +237,19 @@ if __name__ == "__main__":
     There may be some issues with this and using different file formats.
     """
 
-    dir = "../data"
-    with open(f'{dir}/data_vgg.p', 'wb') as pickle_file:
-        pickle.dump(preprocess(dir, resnet=False), pickle_file)
+    # # resnet
+    # feature_fn = tf.keras.applications.ResNet50(False)  ## Produces Bx7x7x2048
+
+    # vgg
+    img_in_shape = (1, 224, 224, 3)
+    model = VGGModel()
+    path = "../code/vgg16_imagenet.h5"
+    model.build(img_in_shape)
+    model.vgg16.load_weights(path, by_name=True)
+    feature_fn = model
+
+    dir = "../data/data_vgg.p"
+
+    with open(f'{dir}', 'wb') as pickle_file:
+        pickle.dump(preprocess(dir, feature_fn), pickle_file)
     print(f'Data has been dumped!')

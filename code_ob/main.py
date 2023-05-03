@@ -9,6 +9,7 @@ from model import ImageCaptionModel, accuracy_function, loss_function
 from preprocess import get_image_feature
 from decoder import TransformerDecoder 
 import transformer
+from preprocess import VGGModel
 
 
 def parse_args(args=None):
@@ -90,7 +91,14 @@ def main(args):
     if args.task in ('single'):
         model = load_model(args)
 
-        image_feat, image = get_image_feature(args.image_path, resnet=False)
+        img_in_shape = (1, 224, 224, 3)
+        vgg_model = VGGModel()
+        path = "../code/vgg16_imagenet.h5"
+        vgg_model.build(img_in_shape)
+        vgg_model.vgg16.load_weights(path, by_name=True)
+        feature_fn = vgg_model
+
+        image_feat, image = get_image_feature(args.image_path, feature_fn)
 
         temperature = 0.5
         output = gen_caption_temperature(model, image_feat, word2idx, word2idx['<pad>'], temperature, args.window_size)
