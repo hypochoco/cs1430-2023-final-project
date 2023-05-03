@@ -8,13 +8,18 @@ There are 3 options to run the code, split up into respective tasks:
 
 In order to run the scene classification model enter the following into the terminal: 
 
-python run.py --task 1 --data ../data/15_Scene
+python run.py --task 1 --data ../data/15_Scene - FOR OUR OWN MODEL
+
+python run.py --task 3 --data ../data/15_Scene - FOR VGG MODEL
+
 
 To run the object classification model enter the following: 
 
-python run.py --task 2 --data ../data/CIFAR-100-modified
+python run.py --task 2 --data ../data/CIFAR-100-modified - FOR OWN MODEL
 
-The same logic follows for task 3 being both models. However we should discuss how we want to implement this a little more in depth.
+python run.py --task 4 --data ../data/CIFAR-100-modified - FOR VGG MODEL
+
+The same logic follows for task 5 being both models. However we should discuss how we want to implement this a little more in depth.
 
 Finally, most of the commands are same as with HW5 minus the LIME implementation. 
 Let me know if you have any questions!

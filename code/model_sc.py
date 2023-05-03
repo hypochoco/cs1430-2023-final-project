@@ -19,23 +19,33 @@ import hyperparameters_sc as hp
 
 #THE CODE BELOW IS JUST A PLACEHOLDER, PLEASE EDIT AS YOU LIKE
 
+
 class YourModel_sc(tf.keras.Model):
     """ Your own neural network model. """
 
     def __init__(self):
         super(YourModel_sc, self).__init__()
 
-        self.optimizer = SGD(learning_rate=hp.learning_rate, momentum=hp.momentum)
+        self.optimizer = SGD()
 
         self.architecture = [
-            Conv2D(10, (5, 5), activation='relu', input_shape=(None, None, 1)),
-            MaxPool2D(pool_size=(2, 2)),
-            Dropout(0.25),
-            Flatten(),
-            Dense(32, activation='relu'),
-            Dropout(0.25),
-            Dense(15, activation='softmax')
-        ]
+         Conv2D(32, (5, 5), activation='relu', input_shape=(None, None, 1)),
+         MaxPool2D((2,2)),
+         tf.keras.layers.BatchNormalization(),
+
+         Conv2D(64, (3, 3), activation='relu', padding="same"),
+         MaxPool2D((2,2)),
+         tf.keras.layers.BatchNormalization(),
+
+         Conv2D(64, (3, 3), activation='relu', padding="same"),
+         MaxPool2D((2,2)),
+         tf.keras.layers.BatchNormalization(),
+      
+         Flatten(),
+         Dense(512, activation='relu'),
+         Dropout(0.4),
+         Dense(15, activation='softmax')
+     ]
 
     def call(self, x):
         """ Passes input image through the network. """
@@ -53,92 +63,77 @@ class YourModel_sc(tf.keras.Model):
         return lossFunction(labels,predictions)
 
 
-# class VGGModel_sc(tf.keras.Model):
-#     def __init__(self):
-#         super(VGGModel_sc, self).__init__()
+class VGGModel_sc(tf.keras.Model):
+    def __init__(self):
+        super(VGGModel_sc, self).__init__()
 
-#         # TASK 3
-#         # TODO: Select an optimizer for your network (see the documentation
-#         #       for tf.keras.optimizers)
+        self.optimizer = SGD(learning_rate=hp.learning_rate)
 
-#        #Add in momentum?
-#         self.optimizer = SGD(learning_rate=hp.learning_rate)
+        self.vgg16 = [
+            # Block 1
+            Conv2D(64, 3, 1, padding="same",
+                   activation="relu", name="block1_conv1"),
+            Conv2D(64, 3, 1, padding="same",
+                   activation="relu", name="block1_conv2"),
+            MaxPool2D(2, name="block1_pool"),
+            # Block 2
+            Conv2D(128, 3, 1, padding="same",
+                   activation="relu", name="block2_conv1"),
+            Conv2D(128, 3, 1, padding="same",
+                   activation="relu", name="block2_conv2"),
+            MaxPool2D(2, name="block2_pool"),
+            # Block 3
+            Conv2D(256, 3, 1, padding="same",
+                   activation="relu", name="block3_conv1"),
+            Conv2D(256, 3, 1, padding="same",
+                   activation="relu", name="block3_conv2"),
+            Conv2D(256, 3, 1, padding="same",
+                   activation="relu", name="block3_conv3"),
+            MaxPool2D(2, name="block3_pool"),
+            # Block 4
+            Conv2D(512, 3, 1, padding="same",
+                   activation="relu", name="block4_conv1"),
+            Conv2D(512, 3, 1, padding="same",
+                   activation="relu", name="block4_conv2"),
+            Conv2D(512, 3, 1, padding="same",
+                   activation="relu", name="block4_conv3"),
+            MaxPool2D(2, name="block4_pool"),
+            # Block 5
+            Conv2D(512, 3, 1, padding="same",
+                   activation="relu", name="block5_conv1"),
+            Conv2D(512, 3, 1, padding="same",
+                   activation="relu", name="block5_conv2"),
+            Conv2D(512, 3, 1, padding="same",
+                   activation="relu", name="block5_conv3"),
+            MaxPool2D(2, name="block5_pool")
+        ]
 
-#         # Don't change the below:
+        for layer in self.vgg16:
+            layer.trainable = False
 
-#         self.vgg16 = [
-#             # Block 1
-#             Conv2D(64, 3, 1, padding="same",
-#                    activation="relu", name="block1_conv1"),
-#             Conv2D(64, 3, 1, padding="same",
-#                    activation="relu", name="block1_conv2"),
-#             MaxPool2D(2, name="block1_pool"),
-#             # Block 2
-#             Conv2D(128, 3, 1, padding="same",
-#                    activation="relu", name="block2_conv1"),
-#             Conv2D(128, 3, 1, padding="same",
-#                    activation="relu", name="block2_conv2"),
-#             MaxPool2D(2, name="block2_pool"),
-#             # Block 3
-#             Conv2D(256, 3, 1, padding="same",
-#                    activation="relu", name="block3_conv1"),
-#             Conv2D(256, 3, 1, padding="same",
-#                    activation="relu", name="block3_conv2"),
-#             Conv2D(256, 3, 1, padding="same",
-#                    activation="relu", name="block3_conv3"),
-#             MaxPool2D(2, name="block3_pool"),
-#             # Block 4
-#             Conv2D(512, 3, 1, padding="same",
-#                    activation="relu", name="block4_conv1"),
-#             Conv2D(512, 3, 1, padding="same",
-#                    activation="relu", name="block4_conv2"),
-#             Conv2D(512, 3, 1, padding="same",
-#                    activation="relu", name="block4_conv3"),
-#             MaxPool2D(2, name="block4_pool"),
-#             # Block 5
-#             Conv2D(512, 3, 1, padding="same",
-#                    activation="relu", name="block5_conv1"),
-#             Conv2D(512, 3, 1, padding="same",
-#                    activation="relu", name="block5_conv2"),
-#             Conv2D(512, 3, 1, padding="same",
-#                    activation="relu", name="block5_conv3"),
-#             MaxPool2D(2, name="block5_pool")
-#         ]
+        self.head = [
+            tf.keras.layers.Flatten(),
+              tf.keras.layers.Dense(512, activation='relu'),
+              tf.keras.layers.Dropout(0.5),
+              tf.keras.layers.Dense(512, activation='relu'),
+              tf.keras.layers.Dropout(0.5),
+              tf.keras.layers.Dense(15, activation='softmax')]
 
-#         # TASK 3
-#         # TODO: Make all layers in self.vgg16 non-trainable. This will freeze the
-#         #       pretrained VGG16 weights into place so that only the classificaiton
-#         #       head is trained.
+        # Don't change the below:
+        self.vgg16 = tf.keras.Sequential(self.vgg16, name="vgg_base")
+        self.head = tf.keras.Sequential(self.head, name="vgg_head")
 
-#         for layer in self.vgg16:
-#             layer.trainable = False
+    def call(self, x):
+        """ Passes the image through the network. """
 
-#         # TODO: Write a classification head for our 15-scene classification task.
+        x = self.vgg16(x)
+        x = self.head(x)
 
-#        #Add names?
-#         self.head = [
-#             Flatten(),
-#             Dense(512, activation="relu"),
-#             BatchNormalization(),
-#             Dropout(0.5),
-#             Dense(15, activation="softmax")
-#         ]
+        return x
 
-#         # Don't change the below:
-#         self.vgg16 = tf.keras.Sequential(self.vgg16, name="vgg_base")
-#         self.head = tf.keras.Sequential(self.head, name="vgg_head")
+    @staticmethod
+    def loss_fn(labels, predictions):
+        """ Loss function for model. """
 
-#     def call(self, x):
-#         """ Passes the image through the network. """
-
-#         x = self.vgg16(x)
-#         x = self.head(x)
-
-#         return x
-
-#     @staticmethod
-#     def loss_fn(labels, predictions):
-#         """ Loss function for model. """
-
-#         lossFunction = SparseCategoricalCrossentropy()
-#         return lossFunction(labels, predictions)
+        lossFunction = SparseCategoricalCrossentropy()
+        return lossFunction(labels, predictions)
