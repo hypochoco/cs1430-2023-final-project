@@ -91,7 +91,7 @@ def main(args):
 
         image_feat, image = preprocess_single_image(args.image_path)
 
-        temperature = 0.2
+        temperature = 0.5
         output = gen_caption_temperature(model, image_feat, word2idx, word2idx['<pad>'], temperature, args.window_size)
         print(output)
         plt.imshow(image)
