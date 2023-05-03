@@ -26,27 +26,26 @@ class YourModel_sc(tf.keras.Model):
     def __init__(self):
         super(YourModel_sc, self).__init__()
 
-        self.optimizer = SGD(learning_rate=hp.learning_rate, momentum=hp.momentum)
-
-
+        self.optimizer = SGD()
 
         self.architecture = [
-            Conv2D(32, (3, 3), activation='relu'),
-            tf.keras.layers.BatchNormalization(),
-            MaxPool2D(),
+         Conv2D(32, (5, 5), activation='relu', input_shape=(None, None, 1)),
+         MaxPool2D((2,2)),
+         tf.keras.layers.BatchNormalization(),
 
-            Conv2D(64, (2, 2), activation='relu'),
-            tf.keras.layers.BatchNormalization(),
-            MaxPool2D(),
+         Conv2D(64, (3, 3), activation='relu', padding="same"),
+         MaxPool2D((2,2)),
+         tf.keras.layers.BatchNormalization(),
 
-            Conv2D(128, (2, 2), activation='relu'),
-            tf.keras.layers.BatchNormalization(),
-            Flatten(),
-
-            Dense(128, activation='relu'),
-            Dropout(0.5),
-            Dense(15, activation='softmax')
-        ]
+         Conv2D(64, (3, 3), activation='relu', padding="same"),
+         MaxPool2D((2,2)),
+         tf.keras.layers.BatchNormalization(),
+      
+         Flatten(),
+         Dense(512, activation='relu'),
+         Dropout(0.4),
+         Dense(15, activation='softmax')
+     ]
 
     def call(self, x):
         """ Passes input image through the network. """
@@ -113,12 +112,12 @@ class VGGModel_sc(tf.keras.Model):
             layer.trainable = False
 
         self.head = [
-            Flatten(),
-            Dense(512, activation="relu"),
-            BatchNormalization(),
-            Dropout(0.5),
-            Dense(15, activation="softmax")
-        ]
+            tf.keras.layers.Flatten(),
+              tf.keras.layers.Dense(512, activation='relu'),
+              tf.keras.layers.Dropout(0.5),
+              tf.keras.layers.Dense(512, activation='relu'),
+              tf.keras.layers.Dropout(0.5),
+              tf.keras.layers.Dense(15, activation='softmax')]
 
         # Don't change the below:
         self.vgg16 = tf.keras.Sequential(self.vgg16, name="vgg_base")
