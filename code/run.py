@@ -171,11 +171,13 @@ def train(model, datasets, checkpoint_path, logs_path, init_epoch, task):
         model.fit(
             x=datasets.train_data,
             validation_data=datasets.test_data,
-            epochs=hp_sc.num_epochs,
+            epochs=1,
             batch_size=None,            # Required as None as we use an ImageDataGenerator; see preprocess.py get_data()
             callbacks=callback_list,
             initial_epoch=init_epoch,
         )
+        model.load_weights("your_weights.h5")
+        
 
     # Object Model
     elif task == '2':
