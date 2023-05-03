@@ -6,6 +6,70 @@ import tensorflow as tf
 import numpy as np
 import collections
 from tqdm import tqdm
+import cv2
+import tensorflow as tf
+from keras.layers import \
+       Conv2D, MaxPool2D, Dropout, Flatten, Dense, BatchNormalization
+
+from keras.optimizers import SGD
+from keras.losses import SparseCategoricalCrossentropy
+
+
+class VGGModel(tf.keras.Model):
+    def __init__(self):
+        super(VGGModel, self).__init__()
+
+        self.optimizer = SGD(learning_rate=1e-3)
+
+        self.vgg16 = [
+            # Block 1
+            Conv2D(64, 3, 1, padding="same",
+                   activation="relu", name="block1_conv1"),
+            Conv2D(64, 3, 1, padding="same",
+                   activation="relu", name="block1_conv2"),
+            MaxPool2D(2, name="block1_pool"),
+            # Block 2
+            Conv2D(128, 3, 1, padding="same",
+                   activation="relu", name="block2_conv1"),
+            Conv2D(128, 3, 1, padding="same",
+                   activation="relu", name="block2_conv2"),
+            MaxPool2D(2, name="block2_pool"),
+            # Block 3
+            Conv2D(256, 3, 1, padding="same",
+                   activation="relu", name="block3_conv1"),
+            Conv2D(256, 3, 1, padding="same",
+                   activation="relu", name="block3_conv2"),
+            Conv2D(256, 3, 1, padding="same",
+                   activation="relu", name="block3_conv3"),
+            MaxPool2D(2, name="block3_pool"),
+            # Block 4
+            Conv2D(512, 3, 1, padding="same",
+                   activation="relu", name="block4_conv1"),
+            Conv2D(512, 3, 1, padding="same",
+                   activation="relu", name="block4_conv2"),
+            Conv2D(512, 3, 1, padding="same",
+                   activation="relu", name="block4_conv3"),
+            MaxPool2D(2, name="block4_pool"),
+            # Block 5
+            Conv2D(512, 3, 1, padding="same",
+                   activation="relu", name="block5_conv1"),
+            Conv2D(512, 3, 1, padding="same",
+                   activation="relu", name="block5_conv2"),
+            Conv2D(512, 3, 1, padding="same",
+                   activation="relu", name="block5_conv3"),
+            MaxPool2D(2, name="block5_pool")
+        ]
+
+        for layer in self.vgg16:
+            layer.trainable = False
+
+        # Don't change the below:
+        self.vgg16 = tf.keras.Sequential(self.vgg16, name="vgg_base")
+
+    def call(self, x):
+        """ Passes the image through the network. """
+        x = self.vgg16(x)
+        return x
 
 
 def preprocess_captions(captions, window_size):
@@ -28,15 +92,25 @@ def preprocess_captions(captions, window_size):
         captions[step] = caption_new
 
 
-def get_image_features(image_names, dir, vis_subset=100):
+def get_image_features(image_names, dir, resnet=True, vis_subset=100):
     """ This method extracts the features from the images using Resnet50.
     
     This function could also be easily modified to use vgg.
     """
 
+    img_in_shape = (1, 224, 224, 3)
+
+    if (resnet):
+        feature_fn = tf.keras.applications.ResNet50(False)  ## Produces Bx7x7x2048
+    else:
+        model = VGGModel()
+        path = "../code/vgg16_imagenet.h5"
+        model.build(img_in_shape)
+        model.vgg16.load_weights(path, by_name=True)
+        feature_fn = model ## Produced Bx7x7x512
+
     image_features = []
     vis_images = []
-    resnet = tf.keras.applications.ResNet50(False)  ## Produces Bx7x7x2048
     gap = tf.keras.layers.GlobalAveragePooling2D()  ## Produces Bx2048
     pbar = tqdm(image_names)
     for i, image_name in enumerate(pbar):
@@ -45,14 +119,45 @@ def get_image_features(image_names, dir, vis_subset=100):
         with Image.open(img_path) as img:
             img_array = np.array(img.resize((224,224)))
         img_in = tf.keras.applications.resnet50.preprocess_input(img_array)[np.newaxis, :]
-        image_features += [gap(resnet(img_in))]
+        image_features += [gap(feature_fn(img_in))]
         if i < vis_subset:
             vis_images += [img_array]
     print()
     return image_features, vis_images
 
 
-def preprocess(dir):
+def get_image_feature(image_path, resnet=True):
+    """ This method extracts the features from the images using
+    either resnet50 or vgg16. 
+    """
+
+    with Image.open(image_path) as img:
+        img_array = np.array(img.resize((224,224)))
+
+    # convert to 3 channels if grayscale
+    if (len(img_array.shape) < 3):  
+        img_array = cv2.cvtColor(img_array[...,np.newaxis], cv2.COLOR_GRAY2RGB)
+
+    img_in = tf.keras.applications.resnet50.preprocess_input(img_array)[np.newaxis, :]
+
+    # define feature function
+    if (resnet):
+        feature_fn = tf.keras.applications.ResNet50(False)  ## Produces Bx7x7x2048
+    else:
+        model = VGGModel()
+        path = "../code/vgg16_imagenet.h5"
+        model.build(img_in.shape)
+        model.vgg16.load_weights(path, by_name=True)
+        feature_fn = model ## Produced Bx7x7x512
+
+    gap = tf.keras.layers.GlobalAveragePooling2D()  ## Produces Bx2048 or Bx512
+    image_features = gap(feature_fn(img_in))
+    vis_images = img_array
+
+    return np.array(image_features).flatten(), np.array(vis_images)
+
+
+def preprocess(dir, resnet=True):
     """ This is the main function that preprocesses the input data.
 
     This may need some tweaking to use other datasets.
@@ -135,9 +240,9 @@ def preprocess(dir):
     
     # use ResNet50 to extract image features
     print("Getting training embeddings")
-    train_image_features, train_images = get_image_features(train_image_names, dir)
+    train_image_features, train_images = get_image_features(train_image_names, dir, resnet=resnet)
     print("Getting testing embeddings")
-    test_image_features,  test_images  = get_image_features(test_image_names, dir)
+    test_image_features,  test_images  = get_image_features(test_image_names, dir, resnet=resnet)
 
     return dict(
         train_captions          = np.array(train_captions),
@@ -151,24 +256,6 @@ def preprocess(dir):
     )
 
 
-def preprocess_single_image(image_path: str):
-    """ Preprocesses a single image.
-
-    :image_path: path to image to preprocess.
-    """
-
-    resnet = tf.keras.applications.ResNet50(False)  ## Produces Bx7x7x2048
-    gap = tf.keras.layers.GlobalAveragePooling2D()  ## Produces Bx2048
-
-    with Image.open(image_path) as img:
-        img_array = np.array(img.resize((224,224)))
-    img_in = tf.keras.applications.resnet50.preprocess_input(img_array)[np.newaxis, :]
-    image_features = gap(resnet(img_in))
-    vis_images = img_array
-
-    return np.array(image_features).flatten(), np.array(vis_images)
-
-
 if __name__ == "__main__":
     """ When this file is run, it will preprocess images in the specified
     foler using an accompanied captions.txt file. 
@@ -177,6 +264,6 @@ if __name__ == "__main__":
     """
 
     dir = "../data"
-    with open(f'{dir}/data.p', 'wb') as pickle_file:
-        pickle.dump(preprocess(dir), pickle_file)
-    print(f'Data has been dumped into {dir}/data.p!')
+    with open(f'{dir}/data_vgg.p', 'wb') as pickle_file:
+        pickle.dump(preprocess(dir, resnet=False), pickle_file)
+    print(f'Data has been dumped!')

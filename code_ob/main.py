@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 
 from model import ImageCaptionModel, accuracy_function, loss_function
-from preprocess import preprocess_single_image
+from preprocess import get_image_feature
 from decoder import TransformerDecoder 
 import transformer
 
@@ -44,7 +44,8 @@ def main(args):
     with open(args.data, 'rb') as data_file:
         data_dict = pickle.load(data_file)
 
-    feat_prep = lambda x: np.repeat(np.array(x).reshape(-1, 2048), 5, axis=0)
+    # feat_prep = lambda x: np.repeat(np.array(x).reshape(-1, 2048), 5, axis=0)
+    feat_prep = lambda x: np.repeat(np.array(x).reshape(-1, 512), 5, axis=0)
     img_prep  = lambda x: np.repeat(x, 5, axis=0)
     train_captions  = np.array(data_dict['train_captions'])
     test_captions   = np.array(data_dict['test_captions'])
@@ -89,7 +90,7 @@ def main(args):
     if args.task in ('single'):
         model = load_model(args)
 
-        image_feat, image = preprocess_single_image(args.image_path)
+        image_feat, image = get_image_feature(args.image_path, resnet=False)
 
         temperature = 0.5
         output = gen_caption_temperature(model, image_feat, word2idx, word2idx['<pad>'], temperature, args.window_size)
@@ -194,3 +195,6 @@ def gen_caption_temperature(model, image_embedding, wordToIds, padID, temp, wind
 
 if __name__ == '__main__':
     main(parse_args())
+
+    # TODO:
+        # integrate with brennan's stuff...
