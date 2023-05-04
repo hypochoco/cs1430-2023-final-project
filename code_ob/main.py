@@ -1,4 +1,5 @@
 import argparse
+from argparse import Namespace
 import numpy as np
 import pickle
 import tensorflow as tf
@@ -106,6 +107,8 @@ def main(args):
         plt.imshow(image)
         plt.text(50, -10, output)
         plt.show()
+
+        return output
         
     ##############################################################################
 
@@ -198,11 +201,32 @@ def gen_caption_temperature(model, image_embedding, wordToIds, padID, temp, wind
     return ' '.join([idsToWords[x] for x in caption_so_far][1:-1])
 
 
+def generate_caption(image_path):
+
+    image_path = "../data/Images/3637013_c675de7705.jpg"
+
+    args = Namespace(
+        task="single",
+        chkpt_path="../data",
+        data="../data/data.p",
+        image_path=image_path,
+
+        epochs=3,
+        lr=1e-3,
+        optimizer="adam",
+        batch_size=100,
+        hidden_size=256,
+        window_size=20,
+        check_valid=True,
+    )
+
+    return main(args)
+
+
 ## END UTILITY METHODS
 ##############################################################################
 
 if __name__ == '__main__':
-    main(parse_args())
+    # main(parse_args())
 
-    # TODO:
-        # integrate with brennan's stuff...
+    generate_caption("test")
