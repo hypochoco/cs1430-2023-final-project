@@ -34,6 +34,8 @@ def parse_args(args=None):
     parser.add_argument('--chkpt_path',     default='',                 help='where the model checkpoint is')
     parser.add_argument('--check_valid',    default=True,               action="store_true",  help='if training, also print validation after each epoch')
     parser.add_argument('--image_path',     type=str,   default='',     help='image path for single image testing.')
+    parser.add_argument('--feature_size',   type=str,   default='',     help='size of features from featur_fn.')
+    parser.add_argument('--feature_type',   default='vgg',              choices=['vgg', 'resnet'], help='feature function type.')
     if args is None: 
         return parser.parse_args()      ## For calling through command line
     return parser.parse_args(args)      ## For calling through notebook.
@@ -47,7 +49,9 @@ def main(args):
         data_dict = pickle.load(data_file)
 
     # feat_prep = lambda x: np.repeat(np.array(x).reshape(-1, 2048), 5, axis=0)
-    feat_prep = lambda x: np.repeat(np.array(x).reshape(-1, 512), 5, axis=0)
+    # feat_prep = lambda x: np.repeat(np.array(x).reshape(-1, 512), 5, axis=0)
+    feat_prep = lambda x: np.repeat(np.array(x).reshape(-1, int(args.feature_size)), 5, axis=0)
+
     img_prep  = lambda x: np.repeat(x, 5, axis=0)
     train_captions  = np.array(data_dict['train_captions'])
     test_captions   = np.array(data_dict['test_captions'])
@@ -92,12 +96,15 @@ def main(args):
     if args.task in ('single'):
         model = load_model(args)
 
-        img_in_shape = (1, 224, 224, 3)
-        vgg_model = VGGModel()
-        path = "../code/vgg16_imagenet.h5"
-        vgg_model.build(img_in_shape)
-        vgg_model.vgg16.load_weights(path, by_name=True)
-        feature_fn = vgg_model
+        if args.feature_type in ('vgg'):
+            img_in_shape = (1, 224, 224, 3)
+            vgg_model = VGGModel()
+            path = "../code/vgg16_imagenet.h5"
+            vgg_model.build(img_in_shape)
+            vgg_model.vgg16.load_weights(path, by_name=True)
+            feature_fn = vgg_model
+        elif args.feature_type in ('resnet'):
+            feature_fn = tf.keras.applications.ResNet50(False)
 
         image_feat, image = get_image_feature(args.image_path, feature_fn)
 
@@ -210,6 +217,8 @@ def generate_caption(image_path):
         chkpt_path="../data",
         data="../data/data.p",
         image_path=image_path,
+        feature_size=512,
+        feature_type="vgg",
 
         epochs=3,
         lr=1e-3,
@@ -227,6 +236,9 @@ def generate_caption(image_path):
 ##############################################################################
 
 if __name__ == '__main__':
+    
+    # https://www.kaggle.com/datasets/adityajn105/flickr8k?resource=download
+
     # main(parse_args())
 
     generate_caption("test")
