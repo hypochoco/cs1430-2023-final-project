@@ -5,6 +5,8 @@ import re
 from datetime import datetime
 import tensorflow as tf
 
+from PIL import Image
+
 import hyperparameters_sc as hp_sc
 import hyperparameters_obj as hp_obj
 #Will have to rework this file to include which hyperparameters are being used
@@ -272,6 +274,60 @@ def test(model, test_data):
         verbose=1,
     )
 
+#Placeholder for processing an image
+def predict_scene(model, image_path, preprocess_fn):
+    """Predict the scene in the image using a pre-trained model."""
+
+    # Load the image and resize it to the model's expected input size
+    input_image = Image.open(image_path)
+    input_image = np.array(input_image)
+    
+    image = resize(input_image, (hp_sc.img_size, hp_sc.img_size, 3), preserve_range=True, mode='reflect', anti_aliasing=True)
+
+    # Preprocess the image and expand the dimensions to match the model's input shape
+    input_image = preprocess_fn(image)
+    input_image = np.expand_dims(input_image, axis=0)
+
+    # Predict the scene using the model
+    predictions = model(input_image)
+    
+
+    # Get the class with the highest probability
+    predicted_class = np.argmax(predictions)
+
+    # Get the sorted class names from the test data folder
+    class_names = get_class_names("../data/15_Scene/test")
+
+    # Convert the predicted class number to the class name
+    predicted_class_name = scene_num_to_scene_name(predicted_class, class_names)
+
+    # Return the predicted class name
+    return predicted_class_name
+
+def get_class_names(folder_path):
+    """Get a sorted list of class names from the folder path."""
+
+    if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
+        print(f"Invalid folder path: {folder_path}")
+        return None
+
+    # Get the subdirectories in the folder
+    class_dirs = [entry.name for entry in os.scandir(folder_path) if entry.is_dir()]
+
+    # Sort the class names
+    class_names = sorted(class_dirs)
+
+    return class_names
+
+def scene_num_to_scene_name(scene_num, class_names):
+    """Convert a class number to the corresponding class name."""
+
+    if scene_num < 0 or scene_num >= len(class_names):
+        print(f"Invalid scene number: {scene_num}")
+        return None
+
+    return class_names[scene_num]
+
 
 def main():
     """ Main function. """
@@ -359,6 +415,28 @@ def main():
         # Load base of VGG model
         model.vgg16.load_weights(ARGS.load_vgg, by_name=True)
 
+
+    elif ARGS.task == '5':
+        datasets = Datasets_sc(ARGS.data, ARGS.task)
+        # Load the pre-trained model for scene classification
+        model_path = "your_weights.h5"
+        model = YourModel_sc()
+        model(tf.keras.Input(shape=(hp_sc.img_size, hp_sc.img_size, 3)))
+        model.load_weights(model_path)
+
+        # Provide the path to the input image
+        input_image_path = "../data/15_Scene/test/Office/image_0001.jpg"
+
+        # Predict the scene in the input image using the pre-trained model
+        predicted_class = predict_scene(model, input_image_path, datasets.preprocess_fn)
+
+        # Print the predicted class
+        print("Predicted class: ", predicted_class)
+        
+
+    elif ARGS.task == '6':
+        pass
+
     else:
         model = None #REPLACE WITH BOTH
         checkpoint_path = "checkpoints" + os.sep + \
@@ -381,9 +459,19 @@ def main():
         else:
             model.head.load_weights(ARGS.load_checkpoint, by_name=False)
 
-    # Make checkpoint directory if needed
-    if not ARGS.evaluate and not os.path.exists(checkpoint_path):
-        os.makedirs(checkpoint_path)
+    # # Make checkpoint directory if needed
+    if ARGS.task == '1':
+        if not ARGS.evaluate and not os.path.exists(checkpoint_path):
+            os.makedirs(checkpoint_path)
+    if ARGS.task == '2':
+        if not ARGS.evaluate and not os.path.exists(checkpoint_path):
+            os.makedirs(checkpoint_path)
+    if ARGS.task == '3':
+        if not ARGS.evaluate and not os.path.exists(checkpoint_path):
+            os.makedirs(checkpoint_path)
+    if ARGS.task == '4':
+        if not ARGS.evaluate and not os.path.exists(checkpoint_path):
+            os.makedirs(checkpoint_path)
 
     # Compile model graph
     model.compile(
@@ -402,7 +490,16 @@ def main():
         # path = ARGS.data + os.sep + ARGS.lime_image
         # LIME_explainer(model, path, datasets.preprocess_fn, timestamp)
     else:
-        train(model, datasets, checkpoint_path, logs_path, init_epoch, ARGS.task)
+        if ARGS.task == '5':
+            checkpoint_path = None
+            logs_path = None
+            train(model, datasets, checkpoint_path, logs_path, init_epoch, ARGS.task)
+        if ARGS.task == '6':
+            checkpoint_path = None
+            logs_path = None
+            train(model, datasets, checkpoint_path, logs_path, init_epoch, ARGS.task)
+        else: 
+            train(model, datasets, checkpoint_path, logs_path, init_epoch, ARGS.task)
 
 
 # Make arguments global
