@@ -473,8 +473,16 @@ def main():
         # Predict the scene in the input image using the pre-trained model
         predicted_class = predict_scene(model, input_image_path, datasets.preprocess_fn)
 
+        captionOutput =generate_caption(input_image_path, "resnet")
+
         # Print the predicted class
         print("Predicted class: ", predicted_class)
+        # Print the caption
+        print("Caption test: ", captionOutput)
+        speechString = captionOutput + " " + predicted_class
+        speaker = speech.TTS(135, 1.0, 0)
+        speaker.speak(speechString)
+        print(speechString)
 
     else:
         model = None #REPLACE WITH BOTH
