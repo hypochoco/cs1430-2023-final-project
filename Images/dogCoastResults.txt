@@ -1,0 +1,9 @@
+Task 5: Our Scene model w/ resnet
+
+Predicted class:  Industrial
+Caption test:  two dogs run on the sand
+
+Task 6: VGG Scene model w/ resnet
+
+Predicted class:  OpenCountry
+Caption test:  two dogs play with the snow

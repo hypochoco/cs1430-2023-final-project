@@ -4,6 +4,7 @@ import argparse
 import re
 from datetime import datetime
 import tensorflow as tf
+import pyttsx3 as tts
 
 from PIL import Image
 
@@ -28,6 +29,9 @@ from skimage.io import imread
 from skimage.segmentation import mark_boundaries
 from matplotlib import pyplot as plt
 import numpy as np
+
+from main import generate_caption
+import text_to_speech as speech
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -421,6 +425,7 @@ def main():
 
 
     elif ARGS.task == '5':
+        ## SCENE CLASSIFICATION
         datasets = Datasets_sc(ARGS.data, ARGS.task)
         # Load the pre-trained model for scene classification
         model_path = "your_weights.h5"
@@ -435,8 +440,18 @@ def main():
         # Predict the scene in the input image using the pre-trained model
         predicted_class = predict_scene(model, input_image_path, datasets.preprocess_fn)
 
+        #OBJECT CAPTION GENERATION
+
+        captionOutput =generate_caption(input_image_path, "resnet")
+
         # Print the predicted class
         print("Predicted class: ", predicted_class)
+        # Print the caption
+        print("Caption test: ", captionOutput)
+        speechString = captionOutput + " " + predicted_class
+        speaker = speech.TTS(135, 1.0, 0)
+        speaker.speak(speechString)
+        print(speechString)
         
 
     elif ARGS.task == '6':
@@ -458,8 +473,16 @@ def main():
         # Predict the scene in the input image using the pre-trained model
         predicted_class = predict_scene(model, input_image_path, datasets.preprocess_fn)
 
+        captionOutput =generate_caption(input_image_path, "resnet")
+
         # Print the predicted class
         print("Predicted class: ", predicted_class)
+        # Print the caption
+        print("Caption test: ", captionOutput)
+        speechString = captionOutput + " " + predicted_class
+        speaker = speech.TTS(135, 1.0, 0)
+        speaker.speak(speechString)
+        print(speechString)
 
     else:
         model = None #REPLACE WITH BOTH

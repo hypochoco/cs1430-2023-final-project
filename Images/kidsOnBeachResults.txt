@@ -1,0 +1,10 @@
+Task 5: Our Scene model w/ resnet
+
+Predicted class:  Industrial
+Caption test:  two little boy is walking on the beach
+
+
+Task 6: VGG Scene model w/ resnet
+
+Predicted class:  Coast
+Caption test:  two young girls are walking on the beach
