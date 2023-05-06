@@ -48,9 +48,9 @@ def main(args):
     with open(args.data, 'rb') as data_file:
         data_dict = pickle.load(data_file)
 
-    # feat_prep = lambda x: np.repeat(np.array(x).reshape(-1, 2048), 5, axis=0)
+    feat_prep = lambda x: np.repeat(np.array(x).reshape(-1, 2048), 5, axis=0)
     # feat_prep = lambda x: np.repeat(np.array(x).reshape(-1, 512), 5, axis=0)
-    feat_prep = lambda x: np.repeat(np.array(x).reshape(-1, int(args.feature_size)), 5, axis=0)
+    # feat_prep = lambda x: np.repeat(np.array(x).reshape(-1, int(args.feature_size)), 5, axis=0)
 
     img_prep  = lambda x: np.repeat(x, 5, axis=0)
     train_captions  = np.array(data_dict['train_captions'])
@@ -210,6 +210,8 @@ def gen_caption_temperature(model, image_embedding, wordToIds, padID, temp, wind
 
 def generate_caption(image_path, feature_type):
 
+    
+
     if feature_type in ('vgg'):
         args = Namespace(
             task="single",
@@ -228,7 +230,7 @@ def generate_caption(image_path, feature_type):
             check_valid=True,
         )
 
-    elif feature_type in ('resent'):
+    elif feature_type in ('resnet'):
         args = Namespace(
             task="single",
             chkpt_path="../data",
@@ -256,7 +258,7 @@ if __name__ == '__main__':
 
     # https://www.kaggle.com/datasets/adityajn105/flickr8k?resource=download
 
-    # main(parse_args())
+    main(parse_args())
 
-    output = generate_caption("../data/Images/3637013_c675de7705.jpg", "vgg")
-    print(output)
+    # output = generate_caption("../data/Images/3637013_c675de7705.jpg", "resnet")
+    # print(output)
