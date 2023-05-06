@@ -1,0 +1,9 @@
+Task 5: Our Scene model w/ resnet
+
+Predicted class:  OpenCountry
+Caption test:  large dog is standing on the tall grass
+
+Task 6: VGG Scene model w/ resnet\
+
+Predicted class:  Coast
+Caption test:  dog running in the grass
