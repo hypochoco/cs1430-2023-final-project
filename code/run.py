@@ -41,13 +41,17 @@ def parse_args():
     parser.add_argument(
         '--task',
         required=True,
-        choices=['1','2' ,'3','4','5'],
+        choices=['1','2' ,'3','4','5', '6'],
         help='''Which task of the assignment to run -
         training from scratch (1), or fine tuning VGG-16 (3).''')
     parser.add_argument(
         '--data',
         default='..'+os.sep+'data'+os.sep,
         help='Location where the dataset is stored.')
+    parser.add_argument(
+        '--imagePath',
+        default='..'+os.sep+'image'+os.sep,
+        help='Location where the input image is stored.')
     parser.add_argument(
         '--load-vgg',
         default='vgg16_imagenet.h5',
@@ -425,7 +429,8 @@ def main():
         model.load_weights(model_path)
 
         # Provide the path to the input image
-        input_image_path = "../data/15_Scene/test/Office/image_0001.jpg"
+        # input_image_path = "../data/15_Scene/test/Office/image_0001.jpg"
+        input_image_path = ARGS.imagePath
 
         # Predict the scene in the input image using the pre-trained model
         predicted_class = predict_scene(model, input_image_path, datasets.preprocess_fn)
