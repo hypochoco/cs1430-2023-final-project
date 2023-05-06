@@ -113,7 +113,7 @@ class Datasets_sc():
     def preprocess_fn(self, img):
         """ Preprocess function for ImageDataGenerator. """
 
-        if self.task == '3':
+        if self.task == '2' or self.task == '4':
             img = tf.keras.applications.vgg16.preprocess_input(img)
         else:
             img = img / 255.
@@ -125,7 +125,7 @@ class Datasets_sc():
     def custom_preprocess_fn(self, img):
         """ Custom preprocess function for ImageDataGenerator. """
 
-        if self.task == '3':
+        if self.task == '2' or self.task == '4':
             img = tf.keras.applications.vgg16.preprocess_input(img)
         else:
             img = img / 255.

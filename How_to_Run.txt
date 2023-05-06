@@ -23,3 +23,5 @@ The same logic follows for task 5 being both models. However we should discuss h
 
 Finally, most of the commands are same as with HW5 minus the LIME implementation. 
 Let me know if you have any questions!
+
+python run.py --task 5 --data ../data/15_Scene --imagePath ../data/15_Scene/test/Office/image_0001.jpg
