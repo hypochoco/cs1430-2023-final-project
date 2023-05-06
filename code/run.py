@@ -440,7 +440,26 @@ def main():
         
 
     elif ARGS.task == '6':
-        pass
+        datasets = Datasets_sc(ARGS.data, ARGS.task)
+        # Load the pre-trained model for scene classification
+        model_path = "vgg_weights.h5"
+        model = VGGModel_sc()
+        model(tf.keras.Input(shape=(224, 224, 3)))
+        # model.load_weights(model_path)
+
+        # Load base of VGG model
+        model.vgg16.load_weights(ARGS.load_vgg, by_name=True)
+        model.head.load_weights(model_path, by_name=True)
+
+        # Provide the path to the input image
+        # input_image_path = "../data/15_Scene/test/Office/image_0001.jpg"
+        input_image_path = ARGS.imagePath
+
+        # Predict the scene in the input image using the pre-trained model
+        predicted_class = predict_scene(model, input_image_path, datasets.preprocess_fn)
+
+        # Print the predicted class
+        print("Predicted class: ", predicted_class)
 
     else:
         model = None #REPLACE WITH BOTH

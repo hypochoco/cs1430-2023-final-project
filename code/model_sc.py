@@ -8,15 +8,6 @@ from keras.losses import SparseCategoricalCrossentropy
 import hyperparameters_sc as hp
 
 
-
-
-
-
-
-
-
-
-
 #THE CODE BELOW IS JUST A PLACEHOLDER, PLEASE EDIT AS YOU LIKE
 
 
