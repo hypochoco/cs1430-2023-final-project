@@ -29,7 +29,7 @@ python run.py --task 4 --data ../data/CIFAR-100-modified
 To hear a description of a particular image, run the following commands from inside the project's code directory:
 ```bash
 # To evaluate the image using the custom models
-python run.py --task 5 ..... TODO
+python run.py --task 5 --data ../data/15_Scene --imagePath ../data/15_Scene/test/Office/image_0001.jpg
 # To evaluate the image using the VGG models
 python run.py --task 6 ..... TODO?
 ```
