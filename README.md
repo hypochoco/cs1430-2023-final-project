@@ -31,5 +31,5 @@ To hear a description of a particular image, run the following commands from ins
 # To evaluate the image using the custom models
 python run.py --task 5 --data ../data/15_Scene --imagePath ../data/15_Scene/test/Office/image_0001.jpg
 # To evaluate the image using the VGG models
-python run.py --task 6 ..... TODO?
+python run.py --task 6 --data ../data/15_Scene --imagePath ../data/15_Scene/test/Office/image_0001.jpg
 ```
