@@ -110,10 +110,10 @@ def main(args):
 
         temperature = 0.5
         output = gen_caption_temperature(model, image_feat, word2idx, word2idx['<pad>'], temperature, args.window_size)
-        print(output)
-        plt.imshow(image)
-        plt.text(50, -10, output)
-        plt.show()
+        # print(output)
+        # plt.imshow(image)
+        # plt.text(50, -10, output)
+        # plt.show()
 
         return output
         
@@ -208,26 +208,43 @@ def gen_caption_temperature(model, image_embedding, wordToIds, padID, temp, wind
     return ' '.join([idsToWords[x] for x in caption_so_far][1:-1])
 
 
-def generate_caption(image_path):
+def generate_caption(image_path, feature_type):
 
-    image_path = "../data/Images/3637013_c675de7705.jpg"
+    if feature_type in ('vgg'):
+        args = Namespace(
+            task="single",
+            chkpt_path="../data",
+            data="../data/data_vgg.p",
+            image_path=image_path,
+            feature_size=512,
+            feature_type="vgg",
 
-    args = Namespace(
-        task="single",
-        chkpt_path="../data",
-        data="../data/data.p",
-        image_path=image_path,
-        feature_size=512,
-        feature_type="vgg",
+            epochs=3,
+            lr=1e-3,
+            optimizer="adam",
+            batch_size=100,
+            hidden_size=256,
+            window_size=20,
+            check_valid=True,
+        )
 
-        epochs=3,
-        lr=1e-3,
-        optimizer="adam",
-        batch_size=100,
-        hidden_size=256,
-        window_size=20,
-        check_valid=True,
-    )
+    elif feature_type in ('resent'):
+        args = Namespace(
+            task="single",
+            chkpt_path="../data",
+            data="../data/data.p",
+            image_path=image_path,
+            feature_size=2048,
+            feature_type="resnet",
+
+            epochs=3,
+            lr=1e-3,
+            optimizer="adam",
+            batch_size=100,
+            hidden_size=256,
+            window_size=20,
+            check_valid=True,
+        )
 
     return main(args)
 
@@ -236,9 +253,10 @@ def generate_caption(image_path):
 ##############################################################################
 
 if __name__ == '__main__':
-    
+
     # https://www.kaggle.com/datasets/adityajn105/flickr8k?resource=download
 
     # main(parse_args())
 
-    generate_caption("test")
+    output = generate_caption("../data/Images/3637013_c675de7705.jpg", "vgg")
+    print(output)
