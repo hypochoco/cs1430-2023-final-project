@@ -444,14 +444,28 @@ def main():
 
         captionOutput =generate_caption(input_image_path, "resnet")
 
+        if predicted_class in ["Bedroom", "Forest", "Kitchen", "LivingRoom", "Store", "Suburb"]:
+            combined_out = captionOutput + " in a " + predicted_class
+        elif predicted_class in ["Office", "OpenCountry"]:
+            combined_out = captionOutput + " in an " + predicted_class
+        elif predicted_class in ["Coast", "Highway", "Mountain", "Street"]:
+            combined_out = captionOutput + " on a " + predicted_class
+        elif predicted_class == "Industrial":
+            combined_out = captionOutput + " in an " + predicted_class + " area"
+        elif predicted_class == "InsideCity":
+            combined_out = captionOutput + " in a city"
+        else:
+            # TallBuilding case
+            combined_out = captionOutput + " near a " + predicted_class
+
         # Print the predicted class
         print("Predicted class: ", predicted_class)
         # Print the caption
-        print("Caption test: ", captionOutput)
-        speechString = captionOutput + " " + predicted_class
+        print("Caption: ", captionOutput)
+        # Print the combined caption
+        print("Combined result: " + combined_out)
         speaker = speech.TTS(135, 1.0, 0)
-        speaker.speak(speechString)
-        print(speechString)
+        speaker.speak(combined_out)
         
 
     elif ARGS.task == '6':
@@ -473,16 +487,30 @@ def main():
         # Predict the scene in the input image using the pre-trained model
         predicted_class = predict_scene(model, input_image_path, datasets.preprocess_fn)
 
-        captionOutput =generate_caption(input_image_path, "resnet")
+        captionOutput = generate_caption(input_image_path, "resnet")
+
+        if predicted_class in ["Bedroom", "Forest", "Kitchen", "LivingRoom", "Store", "Suburb"]:
+            combined_out = captionOutput + " in a " + predicted_class
+        elif predicted_class in ["Office", "OpenCountry"]:
+            combined_out = captionOutput + " in an " + predicted_class
+        elif predicted_class in ["Coast", "Highway", "Mountain", "Street"]:
+            combined_out = captionOutput + " on a " + predicted_class
+        elif predicted_class == "Industrial":
+            combined_out = captionOutput + " in an " + predicted_class + " area"
+        elif predicted_class == "InsideCity":
+            combined_out = captionOutput + " in a city"
+        else:
+            # TallBuilding case
+            combined_out = captionOutput + " near a " + predicted_class
 
         # Print the predicted class
         print("Predicted class: ", predicted_class)
         # Print the caption
-        print("Caption test: ", captionOutput)
-        speechString = captionOutput + " " + predicted_class
+        print("Caption: ", captionOutput)
+        # Print the combined caption
+        print("Combined result: " + combined_out)
         speaker = speech.TTS(135, 1.0, 0)
-        speaker.speak(speechString)
-        print(speechString)
+        speaker.speak(combined_out)
 
     else:
         model = None #REPLACE WITH BOTH
