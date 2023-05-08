@@ -33,3 +33,5 @@ python run.py --task 5 --data ../data/15_Scene --imagePath ../data/15_Scene/test
 # To evaluate the image using the VGG models
 python run.py --task 6 --data ../data/15_Scene --imagePath ../data/15_Scene/test/Office/image_0001.jpg
 ```
+## Known Bugs
+The text-to-speech code from pyttsx3 may not work on Macs.
