@@ -2,10 +2,10 @@
 ## Project Description
 The goal of this project is to take in an image and read aloud an accurate description of that image. To achieve this, the image is evaluated by both a scene recognition convolutional neural network (CNN) and an image captioning CNN. The output from both models is combined into a single string, which is then read aloud using the [pyttsx3](https://pypi.org/project/pyttsx3/) library. The scene recognition CNN is trained using the 15 Scene dataset from homework 5. The image captioning CNN is trained with the Flickr 8K dataset. 
 ## Team Members
-- Name: contribution
-- ...
-- ...
-- ...
+- Autumn Tilley
+- Brennan Nugent
+- Daniel Cho
+- Olena Mursalova
 ## How to Run
 ### Dependencies
 To run this project, make sure to use the CSCI 1430 python environment. Additionally, install the [pyttsx3](https://pypi.org/project/pyttsx3/) library using the following command:
